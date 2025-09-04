@@ -185,9 +185,9 @@ const Index = () => {
       </div>
       
       {/* Input Area - Fixed at bottom for mobile */}
-      <div className="sticky bottom-0 p-3 sm:p-4 border-t border-border bg-background z-10">
+      <div className="sticky bottom-0 p-2 sm:p-3 md:p-4 border-t border-border bg-background z-10">
         <div className="max-w-4xl mx-auto">
-          <div className="flex gap-2 items-end">
+          <div className="flex gap-1.5 sm:gap-2 items-end">
             <div className="flex-1 relative">
               <Input
                 ref={inputRef}
@@ -195,19 +195,19 @@ const Index = () => {
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder="Message Ask Chinu(AI)..."
-                className="w-full rounded-2xl border-2 focus:border-primary pr-12 py-3 text-base resize-none"
+                className="w-full rounded-2xl border-2 focus:border-primary pr-10 sm:pr-12 py-2.5 sm:py-3 text-sm sm:text-base resize-none"
                 disabled={isLoading}
               />
-              <div className="absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center gap-1">
+              <div className="absolute right-2 sm:right-3 top-1/2 transform -translate-y-1/2 flex items-center gap-0.5 sm:gap-1">
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => fileInputRef.current?.click()}
                   disabled={isLoading}
-                  className="h-6 w-6 p-0 text-muted-foreground hover:text-foreground"
+                  className="h-5 w-5 sm:h-6 sm:w-6 p-0 text-muted-foreground hover:text-foreground"
                   title="Upload file or image"
                 >
-                  <Paperclip className="w-4 h-4" />
+                  <Paperclip className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                 </Button>
                 <VoiceInput onTranscript={handleVoiceTranscript} disabled={isLoading} />
               </div>
@@ -216,12 +216,12 @@ const Index = () => {
               onClick={() => sendMessage()}
               disabled={isLoading || !inputValue.trim()}
               size="sm"
-              className="rounded-full w-10 h-10 p-0 bg-primary hover:bg-primary/90 flex-shrink-0"
+              className="rounded-full w-9 h-9 sm:w-10 sm:h-10 p-0 bg-primary hover:bg-primary/90 flex-shrink-0"
             >
-              <Send className="w-4 h-4" />
+              <Send className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </Button>
           </div>
-          <div className="text-xs text-muted-foreground text-center mt-2 hidden sm:block">
+          <div className="text-xs text-muted-foreground text-center mt-1 sm:mt-2 hidden sm:block">
             Ask Chinu(AI) can make mistakes. Consider checking important information.
           </div>
         </div>

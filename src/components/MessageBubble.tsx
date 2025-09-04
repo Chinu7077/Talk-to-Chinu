@@ -32,43 +32,43 @@ const MessageBubble = ({ message, onReaction }: MessageBubbleProps) => {
 
   return (
     <div
-      className={`flex gap-3 ${message.isUser ? 'justify-end' : 'justify-start'}`}
+      className={`flex gap-2 sm:gap-3 ${message.isUser ? 'justify-end' : 'justify-start'}`}
       onMouseEnter={() => setShowActions(true)}
       onMouseLeave={() => setShowActions(false)}
     >
       {!message.isUser && (
-        <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
-          <div className="w-4 h-4 bg-primary-foreground rounded-full"></div>
+        <div className="w-7 h-7 sm:w-8 sm:h-8 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
+          <div className="w-3.5 h-3.5 sm:w-4 sm:h-4 bg-primary-foreground rounded-full"></div>
         </div>
       )}
       
-      <div className="max-w-[80%] group">
+      <div className="max-w-[85%] sm:max-w-[80%] group">
         <div
-          className={`rounded-lg px-4 py-3 ${
+          className={`rounded-lg px-3 py-2 sm:px-4 sm:py-3 ${
             message.isUser
               ? 'bg-primary text-primary-foreground'
               : 'bg-muted'
           }`}
         >
-          <p className="whitespace-pre-wrap text-sm leading-relaxed">
+          <p className="whitespace-pre-wrap text-sm sm:text-sm leading-relaxed break-words">
             {message.text}
           </p>
           
-          <div className="flex items-center justify-between mt-2">
+          <div className="flex items-center justify-between mt-1 sm:mt-2">
             <span className="text-xs opacity-70">
               {formatTime(message.timestamp)}
             </span>
             
             {showActions && (
-              <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+              <div className="flex items-center gap-0.5 sm:gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={copyToClipboard}
-                  className="h-6 w-6 p-0"
+                  className="h-5 w-5 sm:h-6 sm:w-6 p-0"
                   title="Copy message"
                 >
-                  <Copy className="w-3 h-3" />
+                  <Copy className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
                 </Button>
                 
                 {!message.isUser && (
@@ -77,19 +77,19 @@ const MessageBubble = ({ message, onReaction }: MessageBubbleProps) => {
                       variant="ghost"
                       size="sm"
                       onClick={() => onReaction?.(message.id, 'like')}
-                      className="h-6 w-6 p-0"
+                      className="h-5 w-5 sm:h-6 sm:w-6 p-0"
                       title="Like message"
                     >
-                      <ThumbsUp className="w-3 h-3" />
+                      <ThumbsUp className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
                     </Button>
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => onReaction?.(message.id, 'dislike')}
-                      className="h-6 w-6 p-0"
+                      className="h-5 w-5 sm:h-6 sm:w-6 p-0"
                       title="Dislike message"
                     >
-                      <ThumbsDown className="w-3 h-3" />
+                      <ThumbsDown className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
                     </Button>
                     <TextToSpeech text={message.text} />
                   </>
@@ -101,8 +101,8 @@ const MessageBubble = ({ message, onReaction }: MessageBubbleProps) => {
       </div>
       
       {message.isUser && (
-        <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center flex-shrink-0">
-          <div className="w-4 h-4 bg-primary rounded-full"></div>
+        <div className="w-7 h-7 sm:w-8 sm:h-8 bg-muted rounded-full flex items-center justify-center flex-shrink-0">
+          <div className="w-3.5 h-3.5 sm:w-4 sm:h-4 bg-primary rounded-full"></div>
         </div>
       )}
     </div>

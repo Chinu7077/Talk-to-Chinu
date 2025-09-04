@@ -262,7 +262,7 @@ const ChatSection = () => {
     <div className="h-full flex bg-background">
       {/* Sidebar */}
       {showSidebar && (
-        <div className="md:block hidden">
+        <div className="hidden md:block">
           <ChatHistorySidebar />
         </div>
       )}
@@ -270,42 +270,44 @@ const ChatSection = () => {
       {/* Mobile Sidebar Overlay */}
       {showSidebar && (
         <div className="md:hidden fixed inset-0 z-50 bg-black/50" onClick={() => setShowSidebar(false)}>
-          <div className="fixed left-0 top-0 h-full w-80 bg-background border-r border-border" onClick={(e) => e.stopPropagation()}>
+          <div className="fixed left-0 top-0 h-full w-72 sm:w-80 bg-background border-r border-border" onClick={(e) => e.stopPropagation()}>
             <ChatHistorySidebar />
           </div>
         </div>
       )}
 
       {/* Main Chat Area */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col min-w-0">
         {/* Chat Header */}
-        <div className="border-b border-border p-3 flex items-center justify-between bg-background">
-          <div className="flex items-center gap-3">
+        <div className="border-b border-border p-2 sm:p-3 flex items-center justify-between bg-background">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setShowSidebar(!showSidebar)}
-              className="h-8 w-8 p-0 md:hidden"
+              className="h-8 w-8 p-0 md:hidden flex-shrink-0"
             >
               {showSidebar ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
             </Button>
             
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
-                <MessageCircle className="w-4 h-4 text-primary-foreground" />
+            <div className="flex items-center gap-2 min-w-0">
+              <div className="w-7 h-7 sm:w-8 sm:h-8 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
+                <MessageCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary-foreground" />
               </div>
-              <h3 className="text-lg font-semibold">Ask Chinu(AI)</h3>
+              <h3 className="text-base sm:text-lg font-semibold truncate">Ask Chinu(AI)</h3>
             </div>
           </div>
           
-          <div className="flex gap-1">
-            <MessageSearch 
-              messages={messages} 
-              onMessageSelect={(messageId) => {
-                const element = document.getElementById(`message-${messageId}`);
-                element?.scrollIntoView({ behavior: 'smooth' });
-              }}
-            />
+          <div className="flex gap-0.5 sm:gap-1 flex-shrink-0">
+            <div className="hidden sm:block">
+              <MessageSearch 
+                messages={messages} 
+                onMessageSelect={(messageId) => {
+                  const element = document.getElementById(`message-${messageId}`);
+                  element?.scrollIntoView({ behavior: 'smooth' });
+                }}
+              />
+            </div>
             <Button
               variant="ghost"
               size="sm"
@@ -339,23 +341,23 @@ const ChatSection = () => {
 
         {/* API Key Setup */}
         {showApiKeyInput && (
-          <div className="bg-card border border-border rounded-lg p-4 m-4">
-            <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
-              <Key className="w-5 h-5 text-primary" />
-              Setup Google AI Studio API Key
+          <div className="bg-card border border-border rounded-lg p-3 sm:p-4 m-2 sm:m-4">
+            <h3 className="text-base sm:text-lg font-semibold mb-2 sm:mb-3 flex items-center gap-2">
+              <Key className="w-4 h-4 sm:w-5 sm:h-5 text-primary flex-shrink-0" />
+              <span className="truncate">Setup Google AI Studio API Key</span>
             </h3>
-            <p className="text-muted-foreground mb-3 text-sm">
+            <p className="text-muted-foreground mb-2 sm:mb-3 text-xs sm:text-sm">
               Get your free API key from <a href="https://makersuite.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Google AI Studio</a>
             </p>
-            <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row gap-2">
               <Input
                 type="password"
                 placeholder="Enter your API key..."
                 value={apiKey}
                 onChange={(e) => setApiKey(e.target.value)}
-                className="flex-1"
+                className="flex-1 min-w-0"
               />
-              <Button onClick={saveApiKey} size="sm">
+              <Button onClick={saveApiKey} size="sm" className="w-full sm:w-auto">
                 Save Key
               </Button>
             </div>
@@ -367,13 +369,13 @@ const ChatSection = () => {
           {/* Chat Area */}
           <div className="flex-1 flex flex-col">
             {/* Messages Area */}
-            <div className="flex-1 overflow-y-auto p-4 pb-32 space-y-4">
+            <div className="flex-1 overflow-y-auto p-2 sm:p-4 pb-20 sm:pb-32 space-y-3 sm:space-y-4">
               {messages.length === 0 && (
-                <div className="flex items-center justify-center h-full">
+                <div className="flex items-center justify-center h-full px-4">
                   <div className="text-center text-muted-foreground">
-                    <MessageCircle className="w-16 h-16 mx-auto mb-4 text-muted-foreground/30" />
-                    <h2 className="text-2xl font-semibold mb-2">How can I help you today?</h2>
-                    <p className="text-sm">I can help you in Hindi, English, and Odia.</p>
+                    <MessageCircle className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-3 sm:mb-4 text-muted-foreground/30" />
+                    <h2 className="text-lg sm:text-2xl font-semibold mb-2">How can I help you today?</h2>
+                    <p className="text-xs sm:text-sm">I can help you in Hindi, English, and Odia.</p>
                   </div>
                 </div>
               )}
@@ -385,15 +387,15 @@ const ChatSection = () => {
               ))}
 
               {isLoading && (
-                <div className="flex gap-3 justify-start">
-                  <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
-                    <MessageCircle className="w-4 h-4 text-primary-foreground" />
+                <div className="flex gap-2 sm:gap-3 justify-start">
+                  <div className="w-7 h-7 sm:w-8 sm:h-8 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
+                    <MessageCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary-foreground" />
                   </div>
-                  <div className="bg-muted rounded-lg px-4 py-3">
+                  <div className="bg-muted rounded-lg px-3 sm:px-4 py-2 sm:py-3">
                     <div className="flex space-x-1">
-                      <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce"></div>
-                      <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce delay-100"></div>
-                      <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce delay-200"></div>
+                      <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-muted-foreground rounded-full animate-bounce"></div>
+                      <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-muted-foreground rounded-full animate-bounce delay-100"></div>
+                      <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-muted-foreground rounded-full animate-bounce delay-200"></div>
                     </div>
                   </div>
                 </div>
@@ -407,10 +409,10 @@ const ChatSection = () => {
 
           {/* Advanced Panel */}
           {showAdvancedPanel && (
-            <div className="w-80 border-l border-border bg-background overflow-y-auto">
-              <div className="p-4">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold">Advanced Features</h3>
+            <div className="w-full sm:w-80 border-l border-border bg-background overflow-y-auto">
+              <div className="p-3 sm:p-4">
+                <div className="flex items-center justify-between mb-3 sm:mb-4">
+                  <h3 className="text-base sm:text-lg font-semibold">Advanced Features</h3>
                   <Button
                     variant="ghost"
                     size="sm"
@@ -421,9 +423,9 @@ const ChatSection = () => {
                   </Button>
                 </div>
 
-                <div className="space-y-6">
+                <div className="space-y-4 sm:space-y-6">
                   <div>
-                    <h4 className="text-sm font-medium mb-2">File Upload</h4>
+                    <h4 className="text-xs sm:text-sm font-medium mb-2">File Upload</h4>
                     <FileUpload onFileProcessed={(file, content) => {
                       sendMessage(`I've uploaded a file: ${file.name}. Here's the content:\n\n${content}`);
                     }} />
