@@ -13,12 +13,23 @@ const Index = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [apiKey, setApiKey] = useState("AIzaSyCv9rA5qo7ni9fhKMou9f57X3zmShHq5bA");
   const [showApiKeyInput, setShowApiKeyInput] = useState(false);
+  const [demoMode, setDemoMode] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const { addMessage, createNewSession, currentSessionId } = useChatHistory();
 
   const systemPrompt = "You are Chinu's AI Assistant. When someone asks about your name or who you are, always respond with: 'I'm Chinu's Assistant. I'm just here to help you. What can I do for you?' When someone asks what you do, always respond with: 'I'm here to help everyone, and I am being upgraded to make me even smarter.' Answer in simple, clear, and human-like tone. If user writes in Hindi, reply in Hindi. If user writes in Odia, reply in Odia. If user writes in English, reply in English. Keep responses short (2-5 lines). For technical queries, explain step by step. Be polite and supportive. You can understand and respond in Hindi, English, and Odia languages.";
+
+  const demoResponses = [
+    "Hello! I'm Chinu's Assistant. I'm just here to help you. What can I do for you?",
+    "I'm here to help everyone, and I am being upgraded to make me even smarter.",
+    "That's a great question! Let me help you with that.",
+    "I understand what you're asking. Here's what I think...",
+    "Thanks for sharing that with me. I'm here to help!",
+    "I'm currently in demo mode due to API limitations, but I'm still here to assist you!",
+    "Even though I'm in demo mode, I can still provide helpful responses to your questions."
+  ];
 
   const sendMessage = async (messageText?: string) => {
     const text = messageText || inputValue.trim();
@@ -31,6 +42,35 @@ const Index = () => {
         description: "Please enter your Google AI Studio API key to start chatting.",
         variant: "destructive",
       });
+      return;
+    }
+
+    // Check if we should use demo mode
+    if (demoMode) {
+      const userMessage = {
+        id: Date.now().toString(),
+        text,
+        isUser: true,
+        timestamp: new Date(),
+      };
+
+      addMessage(userMessage);
+      setInputValue("");
+      setIsLoading(true);
+
+      // Simulate API delay
+      setTimeout(() => {
+        const randomResponse = demoResponses[Math.floor(Math.random() * demoResponses.length)];
+        const aiMessage = {
+          id: (Date.now() + 1).toString(),
+          text: randomResponse,
+          isUser: false,
+          timestamp: new Date(),
+        };
+        addMessage(aiMessage);
+        setIsLoading(false);
+      }, 1000);
+
       return;
     }
 
@@ -98,11 +138,35 @@ const Index = () => {
       addMessage(aiMessage);
     } catch (error) {
       console.error('Error:', error);
+      
+      // Show specific error message
+      const errorMessage = error instanceof Error ? error.message : "Failed to get AI response";
+      
       toast({
-        title: "Error",
-        description: "Failed to get AI response. Please check your API key and try again.",
+        title: "API Error",
+        description: errorMessage,
         variant: "destructive",
       });
+
+      // Add a fallback response when API fails
+      const fallbackMessage = {
+        id: (Date.now() + 1).toString(),
+        text: `I apologize, but I'm currently unable to process your request due to API limitations. ${errorMessage.includes('quota') ? 'Switching to demo mode. You can still chat with me!' : 'Please check your API key and try again.'}`,
+        isUser: false,
+        timestamp: new Date(),
+      };
+
+      addMessage(fallbackMessage);
+
+      // Auto-switch to demo mode if quota exceeded
+      if (errorMessage.includes('quota')) {
+        setDemoMode(true);
+        toast({
+          title: "Switched to Demo Mode",
+          description: "API quota exceeded. You can still chat in demo mode!",
+          variant: "default",
+        });
+      }
     } finally {
       setIsLoading(false);
     }
@@ -254,14 +318,24 @@ const Index = () => {
             <div className="text-xs text-muted-foreground">
               Ask Chinu(AI) can make mistakes. Consider checking important information.
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowApiKeyInput(!showApiKeyInput)}
-              className="text-xs text-muted-foreground hover:text-foreground"
-            >
-              {showApiKeyInput ? 'Hide' : 'API Key'}
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setDemoMode(!demoMode)}
+                className={`text-xs ${demoMode ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}
+              >
+                {demoMode ? 'Demo Mode ON' : 'Demo Mode'}
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowApiKeyInput(!showApiKeyInput)}
+                className="text-xs text-muted-foreground hover:text-foreground"
+              >
+                {showApiKeyInput ? 'Hide' : 'API Key'}
+              </Button>
+            </div>
           </div>
         </div>
         
