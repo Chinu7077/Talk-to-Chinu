@@ -13,7 +13,8 @@ const Index = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [apiKey, setApiKey] = useState("AIzaSyCv9rA5qo7ni9fhKMou9f57X3zmShHq5bA");
   const [showApiKeyInput, setShowApiKeyInput] = useState(false);
-  const [demoMode, setDemoMode] = useState(false);
+  const [demoMode, setDemoMode] = useState(true); // Start in demo mode by default
+  const [apiError, setApiError] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
@@ -30,6 +31,56 @@ const Index = () => {
     "I'm currently in demo mode due to API limitations, but I'm still here to assist you!",
     "Even though I'm in demo mode, I can still provide helpful responses to your questions."
   ];
+
+  const testApiConnection = async () => {
+    try {
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            contents: [
+              {
+                parts: [
+                  { text: "test" }
+                ]
+              }
+            ]
+          })
+        }
+      );
+
+      if (response.ok) {
+        setApiError(false);
+        setDemoMode(false);
+        toast({
+          title: "API Connected!",
+          description: "Switched to normal mode with real AI responses.",
+          variant: "default",
+        });
+        return true;
+      } else {
+        const errorData = await response.json();
+        if (errorData.error?.code === 429) {
+          setApiError(true);
+          setDemoMode(true);
+          toast({
+            title: "API Quota Exceeded",
+            description: "Switched to demo mode. Get a new API key to use real AI.",
+            variant: "destructive",
+          });
+        }
+        return false;
+      }
+    } catch (error) {
+      setApiError(true);
+      setDemoMode(true);
+      return false;
+    }
+  };
 
   const sendMessage = async (messageText?: string) => {
     const text = messageText || inputValue.trim();
@@ -258,16 +309,13 @@ const Index = () => {
                 className="flex-1"
               />
               <Button
-                onClick={() => {
+                onClick={async () => {
                   setShowApiKeyInput(false);
-                  toast({
-                    title: "API Key Updated",
-                    description: "Your API key has been updated successfully.",
-                  });
+                  await testApiConnection();
                 }}
                 size="sm"
               >
-                Save
+                Test & Save
               </Button>
             </div>
             <p className="text-xs text-muted-foreground mt-1">
@@ -315,17 +363,43 @@ const Index = () => {
             </Button>
           </div>
           <div className="flex items-center justify-between mt-2">
-            <div className="text-xs text-muted-foreground">
-              Ask Chinu(AI) can make mistakes. Consider checking important information.
+            <div className="flex items-center gap-2">
+              <div className="text-xs text-muted-foreground">
+                Ask Chinu(AI) can make mistakes. Consider checking important information.
+              </div>
+              {demoMode && (
+                <div className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full">
+                  Demo Mode
+                </div>
+              )}
+              {apiError && !demoMode && (
+                <div className="text-xs bg-red-100 text-red-800 px-2 py-1 rounded-full">
+                  API Error
+                </div>
+              )}
             </div>
             <div className="flex items-center gap-2">
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => setDemoMode(!demoMode)}
+                onClick={async () => {
+                  if (demoMode) {
+                    // Try to switch to normal mode
+                    await testApiConnection();
+                  } else {
+                    // Switch to demo mode
+                    setDemoMode(true);
+                    setApiError(false);
+                    toast({
+                      title: "Switched to Demo Mode",
+                      description: "Now using sample responses.",
+                      variant: "default",
+                    });
+                  }
+                }}
                 className={`text-xs ${demoMode ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}
               >
-                {demoMode ? 'Demo Mode ON' : 'Demo Mode'}
+                {demoMode ? 'Try Real AI' : 'Demo Mode'}
               </Button>
               <Button
                 variant="ghost"
