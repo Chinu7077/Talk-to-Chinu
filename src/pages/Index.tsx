@@ -12,6 +12,7 @@ const Index = () => {
   const [inputValue, setInputValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [apiKey, setApiKey] = useState("AIzaSyCv9rA5qo7ni9fhKMou9f57X3zmShHq5bA");
+  const [showApiKeyInput, setShowApiKeyInput] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
@@ -70,7 +71,18 @@ const Index = () => {
       );
 
       if (!response.ok) {
-        throw new Error('Failed to get AI response');
+        const errorData = await response.json();
+        console.error('API Error:', errorData);
+        
+        if (errorData.error?.code === 429) {
+          throw new Error('API quota exceeded. Please check your Google AI Studio billing or try again later.');
+        } else if (errorData.error?.code === 400) {
+          throw new Error('Invalid API key. Please check your Google AI Studio API key.');
+        } else if (errorData.error?.code === 403) {
+          throw new Error('API access denied. Please check your API key permissions.');
+        } else {
+          throw new Error(`API Error: ${errorData.error?.message || 'Failed to get AI response'}`);
+        }
       }
 
       const data = await response.json();
@@ -158,6 +170,49 @@ const Index = () => {
         <ChatSection />
       </div>
       
+      {/* API Key Input */}
+      {showApiKeyInput && (
+        <div className="p-4 border-t border-border bg-muted/50">
+          <div className="max-w-4xl mx-auto">
+            <div className="flex items-center gap-2 mb-2">
+              <label className="text-sm font-medium">Google AI Studio API Key:</label>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowApiKeyInput(false)}
+                className="h-6 w-6 p-0"
+              >
+                ×
+              </Button>
+            </div>
+            <div className="flex gap-2">
+              <Input
+                type="password"
+                value={apiKey}
+                onChange={(e) => setApiKey(e.target.value)}
+                placeholder="Enter your Google AI Studio API key"
+                className="flex-1"
+              />
+              <Button
+                onClick={() => {
+                  setShowApiKeyInput(false);
+                  toast({
+                    title: "API Key Updated",
+                    description: "Your API key has been updated successfully.",
+                  });
+                }}
+                size="sm"
+              >
+                Save
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              Get your free API key from <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Google AI Studio</a>
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Input Area - Just above footer */}
       <div className="p-4 border-t border-border bg-background">
         <div className="max-w-4xl mx-auto">
@@ -195,8 +250,18 @@ const Index = () => {
               <Send className="w-4 h-4" />
             </Button>
           </div>
-          <div className="text-xs text-muted-foreground text-center mt-2">
-            Ask Chinu(AI) can make mistakes. Consider checking important information.
+          <div className="flex items-center justify-between mt-2">
+            <div className="text-xs text-muted-foreground">
+              Ask Chinu(AI) can make mistakes. Consider checking important information.
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowApiKeyInput(!showApiKeyInput)}
+              className="text-xs text-muted-foreground hover:text-foreground"
+            >
+              {showApiKeyInput ? 'Hide' : 'API Key'}
+            </Button>
           </div>
         </div>
         
