@@ -11,7 +11,7 @@ import Footer from "@/components/Footer";
 const Index = () => {
   const [inputValue, setInputValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [apiKey, setApiKey] = useState("AIzaSyALYTBHYnetAwVDc9-RHRi-gxzjpZGHVAY");
+  const [apiKey, setApiKey] = useState("AIzaSyCv9rA5qo7ni9fhKMou9f57X3zmShHq5bA");
   const inputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
