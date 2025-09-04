@@ -180,13 +180,12 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
-      <div className="flex-1">
+      <div className="flex-1 overflow-hidden">
         <ChatSection />
       </div>
       
-
-      {/* Input Area - Just above footer */}
-      <div className="p-4 border-t border-border bg-background">
+      {/* Input Area - Fixed at bottom for mobile */}
+      <div className="sticky bottom-0 p-3 sm:p-4 border-t border-border bg-background z-10">
         <div className="max-w-4xl mx-auto">
           <div className="flex gap-2 items-end">
             <div className="flex-1 relative">
@@ -217,12 +216,12 @@ const Index = () => {
               onClick={() => sendMessage()}
               disabled={isLoading || !inputValue.trim()}
               size="sm"
-              className="rounded-full w-10 h-10 p-0 bg-primary hover:bg-primary/90"
+              className="rounded-full w-10 h-10 p-0 bg-primary hover:bg-primary/90 flex-shrink-0"
             >
               <Send className="w-4 h-4" />
             </Button>
           </div>
-          <div className="text-xs text-muted-foreground text-center mt-2">
+          <div className="text-xs text-muted-foreground text-center mt-2 hidden sm:block">
             Ask Chinu(AI) can make mistakes. Consider checking important information.
           </div>
         </div>
