@@ -11,7 +11,7 @@ import Footer from "@/components/Footer";
 const Index = () => {
   const [inputValue, setInputValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [apiKey, setApiKey] = useState("AIzaSyCv9rA5qo7ni9fhKMou9f57X3zmShHq5bA");
+  const [apiKey, setApiKey] = useState("AIzaSyA9SQQf6uuIHC-4AyN8dqKjr2SMvs14lUo");
   const [showApiKeyInput, setShowApiKeyInput] = useState(false);
   const [demoMode, setDemoMode] = useState(true); // Start in demo mode by default
   const [apiError, setApiError] = useState(false);
