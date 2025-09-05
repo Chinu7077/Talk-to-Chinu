@@ -35,6 +35,15 @@ const Footer = () => {
           {/* Right side - Social icons */}
           <div className="flex items-center gap-2">
             <a 
+              href="https://github.com/Chinu7077" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-muted-foreground hover:text-primary transition-colors duration-200"
+              title="View GitHub Profile"
+            >
+              <Github className="w-3 h-3" />
+            </a>
+            <a 
               href="https://x.com/MrChinmayaKumar" 
               target="_blank" 
               rel="noopener noreferrer"
