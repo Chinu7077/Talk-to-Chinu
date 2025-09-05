@@ -1,11 +1,12 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { UserIdentification } from '@/utils/userIdentification';
 
 interface CreditContextType {
   credits: number;
   lastReset: Date | null;
   timeUntilReset: number;
-  useCredit: () => boolean;
-  resetCredits: () => void;
+  useCredit: () => Promise<boolean>;
+  resetCredits: () => Promise<void>;
   isOutOfCredits: boolean;
   checkApiCredits: () => Promise<number>;
 }
@@ -22,31 +23,38 @@ export const CreditProvider = ({ children }: { children: React.ReactNode }) => {
 
   // Load credits from localStorage on mount
   useEffect(() => {
-    const savedCredits = localStorage.getItem('ai-chat-credits');
-    const savedLastReset = localStorage.getItem('ai-chat-last-reset');
-    
-    if (savedCredits && savedLastReset) {
-      const lastResetDate = new Date(savedLastReset);
-      const now = new Date();
-      const hoursSinceReset = (now.getTime() - lastResetDate.getTime()) / (1000 * 60 * 60);
+    const loadUserCredits = async () => {
+      const creditsKey = await UserIdentification.getStorageKey('ai-chat-credits');
+      const resetKey = await UserIdentification.getStorageKey('ai-chat-last-reset');
       
-      if (hoursSinceReset >= RESET_HOURS) {
-        // Reset credits if 24 hours have passed
-        setCredits(DAILY_CREDITS);
-        setLastReset(now);
-        localStorage.setItem('ai-chat-credits', DAILY_CREDITS.toString());
-        localStorage.setItem('ai-chat-last-reset', now.toISOString());
+      const savedCredits = localStorage.getItem(creditsKey);
+      const savedLastReset = localStorage.getItem(resetKey);
+      
+      if (savedCredits && savedLastReset) {
+        const lastResetDate = new Date(savedLastReset);
+        const now = new Date();
+        const hoursSinceReset = (now.getTime() - lastResetDate.getTime()) / (1000 * 60 * 60);
+        
+        if (hoursSinceReset >= RESET_HOURS) {
+          // Reset credits if 24 hours have passed
+          setCredits(DAILY_CREDITS);
+          setLastReset(now);
+          localStorage.setItem(creditsKey, DAILY_CREDITS.toString());
+          localStorage.setItem(resetKey, now.toISOString());
+        } else {
+          setCredits(parseInt(savedCredits));
+          setLastReset(lastResetDate);
+        }
       } else {
-        setCredits(parseInt(savedCredits));
-        setLastReset(lastResetDate);
+        // First time user for this IP/device
+        setCredits(DAILY_CREDITS);
+        setLastReset(new Date());
+        localStorage.setItem(creditsKey, DAILY_CREDITS.toString());
+        localStorage.setItem(resetKey, new Date().toISOString());
       }
-    } else {
-      // First time user
-      setCredits(DAILY_CREDITS);
-      setLastReset(new Date());
-      localStorage.setItem('ai-chat-credits', DAILY_CREDITS.toString());
-      localStorage.setItem('ai-chat-last-reset', new Date().toISOString());
-    }
+    };
+
+    loadUserCredits();
   }, []);
 
   // Update countdown timer
@@ -74,21 +82,24 @@ export const CreditProvider = ({ children }: { children: React.ReactNode }) => {
     return () => clearInterval(interval);
   }, [lastReset]);
 
-  const useCredit = (): boolean => {
+  const useCredit = async (): Promise<boolean> => {
     if (credits > 0) {
       const newCredits = credits - 1;
       setCredits(newCredits);
-      localStorage.setItem('ai-chat-credits', newCredits.toString());
+      const creditsKey = await UserIdentification.getStorageKey('ai-chat-credits');
+      localStorage.setItem(creditsKey, newCredits.toString());
       return true;
     }
     return false;
   };
 
-  const resetCredits = () => {
+  const resetCredits = async () => {
     setCredits(DAILY_CREDITS);
     setLastReset(new Date());
-    localStorage.setItem('ai-chat-credits', DAILY_CREDITS.toString());
-    localStorage.setItem('ai-chat-last-reset', new Date().toISOString());
+    const creditsKey = await UserIdentification.getStorageKey('ai-chat-credits');
+    const resetKey = await UserIdentification.getStorageKey('ai-chat-last-reset');
+    localStorage.setItem(creditsKey, DAILY_CREDITS.toString());
+    localStorage.setItem(resetKey, new Date().toISOString());
   };
 
   const checkApiCredits = async (): Promise<number> => {

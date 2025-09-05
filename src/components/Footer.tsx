@@ -1,4 +1,5 @@
 import { Github, Twitter, Linkedin, Mail } from "lucide-react";
+import UserInfo from "./UserInfo";
 
 const Footer = () => {
   return (
@@ -13,16 +14,21 @@ const Footer = () => {
         </div>
         
         <div className="flex items-center justify-between">
-          {/* Left side - Made by Chinu */}
-          <div className="flex items-center gap-1">
-            <div className="text-xs text-muted-foreground">
-              Made with <span className="text-red-500 animate-pulse">♥</span> by
+          {/* Left side - Made by Chinu and User Info */}
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1">
+              <div className="text-xs text-muted-foreground">
+                Made with <span className="text-red-500 animate-pulse">♥</span> by
+              </div>
+              <div className="relative group">
+                <span className="font-bold text-xs bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent hover:from-pink-600 hover:via-purple-600 hover:to-blue-600 transition-all duration-300 cursor-pointer">
+                  Chinu
+                </span>
+                <div className="absolute -bottom-0.5 left-0 w-full h-0.5 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
+              </div>
             </div>
-            <div className="relative group">
-              <span className="font-bold text-xs bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent hover:from-pink-600 hover:via-purple-600 hover:to-blue-600 transition-all duration-300 cursor-pointer">
-                Chinu
-              </span>
-              <div className="absolute -bottom-0.5 left-0 w-full h-0.5 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
+            <div className="hidden sm:block">
+              <UserInfo />
             </div>
           </div>
 

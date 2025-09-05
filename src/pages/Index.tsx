@@ -83,8 +83,8 @@ const Index = () => {
     setInputValue("");
     setIsLoading(true);
 
-    // Use a credit
-    useCredit();
+                    // Use a credit
+                await useCredit();
 
     try {
       const response = await fetch(

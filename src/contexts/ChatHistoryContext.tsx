@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { UserIdentification } from '@/utils/userIdentification';
 
 export interface Message {
   id: string;
@@ -40,25 +41,39 @@ export const useChatHistory = () => {
 export const ChatHistoryProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [sessions, setSessions] = useState<ChatSession[]>([]);
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
-    const savedSessions = localStorage.getItem('chat-sessions');
-    if (savedSessions) {
-      const parsedSessions = JSON.parse(savedSessions).map((session: any) => ({
-        ...session,
-        createdAt: new Date(session.createdAt),
-        updatedAt: new Date(session.updatedAt),
-        messages: session.messages.map((msg: any) => ({
-          ...msg,
-          timestamp: new Date(msg.timestamp)
-        }))
-      }));
-      setSessions(parsedSessions);
-    }
+    const loadUserHistory = async () => {
+      const storageKey = await UserIdentification.getStorageKey('chat-sessions');
+      const savedSessions = localStorage.getItem(storageKey);
+      
+      if (savedSessions) {
+        const parsedSessions = JSON.parse(savedSessions).map((session: any) => ({
+          ...session,
+          createdAt: new Date(session.createdAt),
+          updatedAt: new Date(session.updatedAt),
+          messages: session.messages.map((msg: any) => ({
+            ...msg,
+            timestamp: new Date(msg.timestamp)
+          }))
+        }));
+        setSessions(parsedSessions);
+      }
+    };
+
+    loadUserHistory();
   }, []);
 
   useEffect(() => {
-    localStorage.setItem('chat-sessions', JSON.stringify(sessions));
+    const saveUserHistory = async () => {
+      const storageKey = await UserIdentification.getStorageKey('chat-sessions');
+      localStorage.setItem(storageKey, JSON.stringify(sessions));
+    };
+
+    if (sessions.length > 0) {
+      saveUserHistory();
+    }
   }, [sessions]);
 
   const getCurrentSession = (): ChatSession | null => {
