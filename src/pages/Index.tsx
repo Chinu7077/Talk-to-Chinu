@@ -218,7 +218,7 @@ const Index = () => {
   };
 
   return (
-    <div className="h-screen bg-background text-foreground flex flex-col overflow-hidden">
+    <div className="h-screen bg-background text-foreground flex flex-col overflow-hidden" style={{ height: 'calc(var(--vh, 1vh) * 100)' }}>
       <div className="flex-1 overflow-hidden">
         <ChatSection />
       </div>

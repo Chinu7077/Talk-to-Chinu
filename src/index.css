@@ -142,17 +142,25 @@
     @apply bg-background text-foreground;
     height: 100%;
     overflow: hidden; /* Prevent page scrolling */
+    position: fixed; /* Fix for Chrome mobile */
+    width: 100%;
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
   }
 
   #root {
     height: 100vh;
+    height: 100dvh; /* Dynamic viewport height for mobile browsers */
     overflow: hidden; /* Prevent root scrolling */
+    position: relative;
+    width: 100%;
   }
 
   /* Custom scrollbar for chat messages only */
   .chat-messages-scroll {
     scrollbar-width: thin;
     scrollbar-color: hsl(var(--muted-foreground) / 0.3) transparent;
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling on mobile */
+    overscroll-behavior: contain; /* Prevent overscroll */
   }
 
   .chat-messages-scroll::-webkit-scrollbar {
@@ -170,5 +178,29 @@
 
   .chat-messages-scroll::-webkit-scrollbar-thumb:hover {
     background-color: hsl(var(--muted-foreground) / 0.5);
+  }
+
+  /* Mobile Chrome specific fixes */
+  @media screen and (max-width: 768px) {
+    html, body {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      -webkit-overflow-scrolling: touch;
+    }
+    
+    #root {
+      height: 100vh;
+      height: 100dvh;
+      height: calc(var(--vh, 1vh) * 100); /* Fallback for older browsers */
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      overflow: hidden;
+    }
   }
 }
