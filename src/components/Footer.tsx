@@ -35,32 +35,27 @@ const Footer = () => {
           {/* Right side - Social icons */}
           <div className="flex items-center gap-2">
             <a 
-              href="https://github.com" 
+              href="https://x.com/MrChinmayaKumar" 
               target="_blank" 
               rel="noopener noreferrer"
               className="text-muted-foreground hover:text-primary transition-colors duration-200"
-            >
-              <Github className="w-3 h-3" />
-            </a>
-            <a 
-              href="https://twitter.com" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="text-muted-foreground hover:text-primary transition-colors duration-200"
+              title="Follow on X (Twitter)"
             >
               <Twitter className="w-3 h-3" />
             </a>
             <a 
-              href="https://linkedin.com" 
+              href="https://www.linkedin.com/in/chinmaya-nayak-09226317b/" 
               target="_blank" 
               rel="noopener noreferrer"
               className="text-muted-foreground hover:text-primary transition-colors duration-200"
+              title="Connect on LinkedIn"
             >
               <Linkedin className="w-3 h-3" />
             </a>
             <a 
-              href="mailto:contact@example.com" 
+              href="mailto:chinuisback@gmail.com" 
               className="text-muted-foreground hover:text-primary transition-colors duration-200"
+              title="Send Email"
             >
               <Mail className="w-3 h-3" />
             </a>
