@@ -1,5 +1,5 @@
 import React from 'react';
-import { Clock, Zap, AlertCircle } from 'lucide-react';
+import { Clock, DollarSign, AlertCircle } from 'lucide-react';
 import { useCredits } from '@/contexts/CreditContext';
 import { Button } from '@/components/ui/button';
 
@@ -29,7 +29,7 @@ const CreditDisplay = () => {
   const getCreditIcon = () => {
     if (credits === 0) return <AlertCircle className="w-4 h-4" />;
     if (credits <= 10) return <Clock className="w-4 h-4" />;
-    return <Zap className="w-4 h-4" />;
+    return <DollarSign className="w-4 h-4" />;
   };
 
   return (
