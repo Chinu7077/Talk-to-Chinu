@@ -218,13 +218,13 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col">
+    <div className="h-screen bg-background text-foreground flex flex-col overflow-hidden">
       <div className="flex-1 overflow-hidden">
         <ChatSection />
       </div>
       
       {/* Input Area - Fixed at bottom for mobile */}
-      <div className="sticky bottom-0 p-2 sm:p-3 md:p-4 border-t border-border bg-background z-10">
+      <div className="flex-shrink-0 p-2 sm:p-3 md:p-4 border-t border-border bg-background">
         <div className="max-w-4xl mx-auto">
           <div className="flex gap-1.5 sm:gap-2 items-end">
             <div className="flex-1 relative">
