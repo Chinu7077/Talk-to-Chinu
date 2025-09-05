@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import React, { useState, useRef } from "react";
 import { Button } from "@/components/ui/enhanced-button";
 import { Input } from "@/components/ui/input";
 import { Send, Paperclip } from "lucide-react";
@@ -18,9 +18,14 @@ const Index = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const { addMessage, createNewSession, currentSessionId } = useChatHistory();
-  const { useCredit, isOutOfCredits, credits, timeUntilReset } = useCredits();
+  const { useCredit, isOutOfCredits, credits, timeUntilReset, checkApiCredits } = useCredits();
 
   const systemPrompt = "You are Chinu's AI Assistant. When someone asks about your name or who you are, always respond with: 'I'm Chinu's Assistant. I'm just here to help you. What can I do for you?' When someone asks what you do, always respond with: 'I'm here to help everyone, and I am being upgraded to make me even smarter.' Answer in simple, clear, and human-like tone. If user writes in Hindi, reply in Hindi. If user writes in Odia, reply in Odia. If user writes in English, reply in English. Keep responses short (2-5 lines). For technical queries, explain step by step. Be polite and supportive. You can understand and respond in Hindi, English, and Odia languages.";
+
+  // Check real API credits on component mount
+  React.useEffect(() => {
+    checkApiCredits();
+  }, []);
 
 
   const sendMessage = async (messageText?: string) => {
@@ -37,8 +42,9 @@ const Index = () => {
       return;
     }
 
-    // Check if user has credits
-    if (isOutOfCredits) {
+    // Check real API credits
+    const realCredits = await checkApiCredits();
+    if (realCredits <= 0) {
       const formatTime = (milliseconds: number) => {
         const hours = Math.floor(milliseconds / (1000 * 60 * 60));
         const minutes = Math.floor((milliseconds % (1000 * 60 * 60)) / (1000 * 60));
@@ -105,6 +111,9 @@ const Index = () => {
         console.error('API Error:', errorData);
         
         if (errorData.error?.code === 429) {
+          // Update credits to 0 when API quota is exceeded
+          const { useCredits } = await import('@/contexts/CreditContext');
+          // This will be handled by the credit context
           throw new Error('API quota exceeded. Please check your Google AI Studio billing or try again later.');
         } else if (errorData.error?.code === 400) {
           throw new Error('Invalid API key. Please check your Google AI Studio API key.');
