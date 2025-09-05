@@ -14,6 +14,7 @@ import ChatHistorySidebar from "./ChatHistorySidebar";
 import MessageSearch from "./MessageSearch";
 import ExportFeatures from "./ExportFeatures";
 import FileUpload from "./FileUpload";
+import CreditDisplay from "./CreditDisplay";
 
 const ChatSection = () => {
   const [inputValue, setInputValue] = useState("");
@@ -298,7 +299,7 @@ const ChatSection = () => {
             </div>
           </div>
           
-          <div className="flex gap-0.5 sm:gap-1 flex-shrink-0">
+          <div className="flex items-center gap-2 sm:gap-1 flex-shrink-0">
             <div className="hidden sm:block">
               <MessageSearch 
                 messages={messages} 
@@ -307,6 +308,9 @@ const ChatSection = () => {
                   element?.scrollIntoView({ behavior: 'smooth' });
                 }}
               />
+            </div>
+            <div className="hidden md:block">
+              <CreditDisplay />
             </div>
             <Button
               variant="ghost"

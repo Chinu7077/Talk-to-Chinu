@@ -4,9 +4,11 @@ import { Input } from "@/components/ui/input";
 import { Send, Paperclip } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useChatHistory } from "@/contexts/ChatHistoryContext";
+import { useCredits } from "@/contexts/CreditContext";
 import VoiceInput from "@/components/VoiceInput";
 import ChatSection from "@/components/ChatSection";
 import Footer from "@/components/Footer";
+import CreditDisplay from "@/components/CreditDisplay";
 
 const Index = () => {
   const [inputValue, setInputValue] = useState("");
@@ -16,6 +18,7 @@ const Index = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const { addMessage, createNewSession, currentSessionId } = useChatHistory();
+  const { useCredit, isOutOfCredits, credits, timeUntilReset } = useCredits();
 
   const systemPrompt = "You are Chinu's AI Assistant. When someone asks about your name or who you are, always respond with: 'I'm Chinu's Assistant. I'm just here to help you. What can I do for you?' When someone asks what you do, always respond with: 'I'm here to help everyone, and I am being upgraded to make me even smarter.' Answer in simple, clear, and human-like tone. If user writes in Hindi, reply in Hindi. If user writes in Odia, reply in Odia. If user writes in English, reply in English. Keep responses short (2-5 lines). For technical queries, explain step by step. Be polite and supportive. You can understand and respond in Hindi, English, and Odia languages.";
 
@@ -29,6 +32,30 @@ const Index = () => {
       toast({
         title: "API Key Required",
         description: "Please enter your Google AI Studio API key to start chatting.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Check if user has credits
+    if (isOutOfCredits) {
+      const formatTime = (milliseconds: number) => {
+        const hours = Math.floor(milliseconds / (1000 * 60 * 60));
+        const minutes = Math.floor((milliseconds % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((milliseconds % (1000 * 60)) / 1000);
+        
+        if (hours > 0) {
+          return `${hours}h ${minutes}m`;
+        } else if (minutes > 0) {
+          return `${minutes}m ${seconds}s`;
+        } else {
+          return `${seconds}s`;
+        }
+      };
+
+      toast({
+        title: "Out of Credits",
+        description: `You've used all 50 free searches. Come back in ${formatTime(timeUntilReset)} for more credits.`,
         variant: "destructive",
       });
       return;
@@ -49,6 +76,9 @@ const Index = () => {
     addMessage(userMessage);
     setInputValue("");
     setIsLoading(true);
+
+    // Use a credit
+    useCredit();
 
     try {
       const response = await fetch(
@@ -221,8 +251,13 @@ const Index = () => {
               <Send className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </Button>
           </div>
-          <div className="text-xs text-muted-foreground text-center mt-1 sm:mt-2 hidden sm:block">
-            Ask Chinu(AI) can make mistakes. Consider checking important information.
+          <div className="flex items-center justify-between mt-1 sm:mt-2">
+            <div className="text-xs text-muted-foreground hidden sm:block">
+              Ask Chinu(AI) can make mistakes. Consider checking important information.
+            </div>
+            <div className="md:hidden">
+              <CreditDisplay />
+            </div>
           </div>
         </div>
         
