@@ -18,13 +18,13 @@ const ThemeToggle = () => {
   const getIcon = () => {
     switch (theme) {
       case 'light':
-        return <Sun className="w-4 h-4" />;
+        return <Sun className="w-3.5 h-3.5" />;
       case 'dark':
-        return <Moon className="w-4 h-4" />;
+        return <Moon className="w-3.5 h-3.5" />;
       case 'system':
-        return <Monitor className="w-4 h-4" />;
+        return <Monitor className="w-3.5 h-3.5" />;
       default:
-        return <Sun className="w-4 h-4" />;
+        return <Sun className="w-3.5 h-3.5" />;
     }
   };
 
@@ -46,7 +46,7 @@ const ThemeToggle = () => {
       variant="ghost"
       size="sm"
       onClick={cycleTheme}
-      className="h-8 w-8 p-0"
+      className="h-7 w-7 p-0"
       title={getTooltip()}
     >
       {getIcon()}

@@ -280,26 +280,26 @@ const ChatSection = () => {
       {/* Main Chat Area */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Chat Header */}
-        <div className="border-b border-border p-2 sm:p-3 flex items-center justify-between bg-background">
-          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+        <div className="border-b border-border p-2 sm:p-3 flex items-center justify-between bg-background flex-shrink-0">
+          <div className="flex items-center gap-1 sm:gap-2 min-w-0 flex-1">
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setShowSidebar(!showSidebar)}
-              className="h-8 w-8 p-0 md:hidden flex-shrink-0"
+              className="h-7 w-7 p-0 md:hidden flex-shrink-0"
             >
-              {showSidebar ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+              {showSidebar ? <X className="w-3.5 h-3.5" /> : <Menu className="w-3.5 h-3.5" />}
             </Button>
             
-            <div className="flex items-center gap-2 min-w-0">
-              <div className="w-7 h-7 sm:w-8 sm:h-8 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
-                <MessageCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary-foreground" />
+            <div className="flex items-center gap-1 sm:gap-2 min-w-0 flex-1">
+              <div className="w-6 h-6 sm:w-7 sm:h-7 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
+                <MessageCircle className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-primary-foreground" />
               </div>
-              <h3 className="text-base sm:text-lg font-semibold truncate">Ask Chinu(AI)</h3>
+              <h3 className="text-sm sm:text-base font-semibold truncate">Ask Chinu(AI)</h3>
             </div>
           </div>
           
-          <div className="flex items-center gap-2 sm:gap-1 flex-shrink-0">
+          <div className="flex items-center gap-1 sm:gap-1.5 flex-shrink-0">
             <div className="hidden sm:block">
               <MessageSearch 
                 messages={messages} 
@@ -316,29 +316,29 @@ const ChatSection = () => {
               variant="ghost"
               size="sm"
               onClick={() => setShowAdvancedPanel(!showAdvancedPanel)}
-              className="h-8 w-8 p-0"
+              className="h-7 w-7 p-0"
               title="Advanced Features"
             >
-              <Settings className="w-4 h-4" />
+              <Settings className="w-3.5 h-3.5" />
             </Button>
             <ThemeToggle />
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setShowApiKeyInput(!showApiKeyInput)}
-              className="h-8 w-8 p-0"
+              className="h-7 w-7 p-0"
               title="API Settings"
             >
-              <Key className="w-4 h-4" />
+              <Key className="w-3.5 h-3.5" />
             </Button>
             <Button
               variant="ghost"
               size="sm"
               onClick={clearChat}
-              className="h-8 w-8 p-0"
+              className="h-7 w-7 p-0"
               title="Clear Chat"
             >
-              <Trash2 className="w-4 h-4" />
+              <Trash2 className="w-3.5 h-3.5" />
             </Button>
           </div>
         </div>
