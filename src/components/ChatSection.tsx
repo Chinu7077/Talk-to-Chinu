@@ -97,12 +97,25 @@ const ChatSection = () => {
   }, []);
 
   useEffect(() => {
-    scrollToBottom();
+    // Use setTimeout to ensure DOM is updated
+    setTimeout(() => {
+      scrollToBottom();
+    }, 100);
   }, [getCurrentSession()?.messages]);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
   };
+
+  // Force scroll to bottom when messages change
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      scrollToBottom();
+    }, 50);
+    return () => clearTimeout(timer);
+  }, [messages.length]);
 
   const saveApiKey = () => {
     if (!apiKey.trim()) {
