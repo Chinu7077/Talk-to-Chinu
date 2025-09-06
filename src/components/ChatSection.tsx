@@ -97,25 +97,14 @@ const ChatSection = () => {
   }, []);
 
   useEffect(() => {
-    // Use setTimeout to ensure DOM is updated
-    setTimeout(() => {
-      scrollToBottom();
-    }, 100);
+    scrollToBottom();
   }, [getCurrentSession()?.messages]);
 
   const scrollToBottom = () => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
-    }
+    setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, 100);
   };
-
-  // Force scroll to bottom when messages change
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      scrollToBottom();
-    }, 50);
-    return () => clearTimeout(timer);
-  }, [messages.length]);
 
   const saveApiKey = () => {
     if (!apiKey.trim()) {
@@ -264,6 +253,11 @@ const ChatSection = () => {
 
   const currentSession = getCurrentSession();
   const messages = currentSession?.messages || [];
+  
+  // Debug log for first message issue
+  useEffect(() => {
+    console.log('Messages updated:', messages.length, messages);
+  }, [messages]);
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {

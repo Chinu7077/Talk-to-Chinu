@@ -234,8 +234,9 @@ const Index = () => {
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder="Message Ask Chinu(AI)..."
-                            className="w-full rounded-2xl border-2 focus:border-primary pr-10 sm:pr-12 py-2.5 sm:py-3 text-base resize-none"
+                className="w-full rounded-2xl border-2 focus:border-primary pr-10 sm:pr-12 py-2.5 sm:py-3 text-sm sm:text-base resize-none"
                 disabled={isLoading}
+                style={{ fontSize: '16px' }} // Prevent zoom on iOS
               />
               <div className="absolute right-2 sm:right-3 top-1/2 transform -translate-y-1/2 flex items-center gap-0.5 sm:gap-1">
                 <Button
