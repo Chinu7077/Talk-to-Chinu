@@ -103,47 +103,9 @@ export const CreditProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const checkApiCredits = async (): Promise<number> => {
-    try {
-      const apiKey = localStorage.getItem('gemini-api-key') || 'AIzaSyA9SQQf6uuIHC-4AyN8dqKjr2SMvs14lUo';
-      
-      // Make a test API call to check if we get a quota error
-      const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            contents: [
-              {
-                parts: [
-                  { text: "test" }
-                ]
-              }
-            ]
-          })
-        }
-      );
-
-      if (response.ok) {
-        // API is working, assume we have credits
-        return credits;
-      } else {
-        const errorData = await response.json();
-        if (errorData.error?.code === 429) {
-          // Quota exceeded
-          setCredits(0);
-          localStorage.setItem('ai-chat-credits', '0');
-          return 0;
-        }
-        // Other error, return current credits
-        return credits;
-      }
-    } catch (error) {
-      console.error('Error checking API credits:', error);
-      return credits;
-    }
+    // Don't make real API calls to check credits - just return current local credits
+    // The actual API quota will be checked when making real requests
+    return credits;
   };
 
   const isOutOfCredits = credits <= 0;

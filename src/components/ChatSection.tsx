@@ -7,6 +7,7 @@ import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { useChatHistory, Message } from "@/contexts/ChatHistoryContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useCredits } from "@/contexts/CreditContext";
+import { UserIdentification } from "@/utils/userIdentification";
 import MessageBubble from "./MessageBubble";
 import VoiceInput from "./VoiceInput";
 import TextToSpeech from "./TextToSpeech";
@@ -29,7 +30,7 @@ const ChatSection = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const { actualTheme } = useTheme();
-  const { useCredit, isOutOfCredits, credits, timeUntilReset, checkApiCredits } = useCredits();
+  const { useCredit, isOutOfCredits, credits, timeUntilReset, checkApiCredits, resetCredits } = useCredits();
   
   const {
     getCurrentSession,
@@ -98,10 +99,7 @@ const ChatSection = () => {
     }
   }, []);
 
-  // Check real API credits on component mount
-  useEffect(() => {
-    checkApiCredits();
-  }, [checkApiCredits]);
+  // Note: Removed unnecessary credit checking on mount to prevent API quota consumption
 
   useEffect(() => {
     scrollToBottom();
@@ -113,7 +111,7 @@ const ChatSection = () => {
     }, 100);
   };
 
-  const saveApiKey = () => {
+  const saveApiKey = async () => {
     if (!apiKey.trim()) {
       toast({
         title: "Error",
@@ -125,9 +123,13 @@ const ChatSection = () => {
     
     localStorage.setItem('gemini-api-key', apiKey);
     setShowApiKeyInput(false);
+    
+    // Reset credits when a new API key is saved (for testing purposes)
+    await resetCredits();
+    
     toast({
       title: "Success",
-      description: "API key saved! You can now start chatting.",
+      description: "API key saved! Credits reset for new key. You can now start chatting.",
     });
   };
 
@@ -146,9 +148,8 @@ const ChatSection = () => {
       return;
     }
 
-    // Check real API credits
-    const realCredits = await checkApiCredits();
-    if (realCredits <= 0) {
+    // Check local credits only (no API call)
+    if (credits <= 0) {
       const formatTime = (milliseconds: number) => {
         const hours = Math.floor(milliseconds / (1000 * 60 * 60));
         const minutes = Math.floor((milliseconds % (1000 * 60 * 60)) / (1000 * 60));
@@ -215,9 +216,10 @@ const ChatSection = () => {
         console.error('API Error:', errorData);
         
         if (errorData.error?.code === 429) {
-          // Update credits to 0 when API quota is exceeded
-          const { useCredits } = await import('@/contexts/CreditContext');
-          // This will be handled by the credit context
+          // API quota exceeded - update local credits to 0
+          setCredits(0);
+          const creditsKey = await UserIdentification.getStorageKey('ai-chat-credits');
+          localStorage.setItem(creditsKey, '0');
           throw new Error('API quota exceeded. Please check your Google AI Studio billing or try again later.');
         } else if (errorData.error?.code === 400) {
           throw new Error('Invalid API key. Please check your Google AI Studio API key.');
@@ -624,6 +626,18 @@ const ChatSection = () => {
                       >
                         <Trash2 className="w-4 h-4 mr-2" />
                         Clear
+                      </Button>
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">Reset Credits</span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={resetCredits}
+                        className="h-8 px-3 text-blue-600 hover:text-blue-700"
+                      >
+                        Reset
                       </Button>
                     </div>
                   </div>
