@@ -6,6 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { useChatHistory, Message } from "@/contexts/ChatHistoryContext";
 import { useTheme } from "@/contexts/ThemeContext";
+import { useCredits } from "@/contexts/CreditContext";
 import MessageBubble from "./MessageBubble";
 import VoiceInput from "./VoiceInput";
 import TextToSpeech from "./TextToSpeech";
@@ -28,6 +29,7 @@ const ChatSection = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const { actualTheme } = useTheme();
+  const { useCredit, isOutOfCredits, credits, timeUntilReset, checkApiCredits } = useCredits();
   
   const {
     getCurrentSession,
@@ -96,6 +98,11 @@ const ChatSection = () => {
     }
   }, []);
 
+  // Check real API credits on component mount
+  useEffect(() => {
+    checkApiCredits();
+  }, [checkApiCredits]);
+
   useEffect(() => {
     scrollToBottom();
   }, [getCurrentSession()?.messages]);
@@ -139,6 +146,31 @@ const ChatSection = () => {
       return;
     }
 
+    // Check real API credits
+    const realCredits = await checkApiCredits();
+    if (realCredits <= 0) {
+      const formatTime = (milliseconds: number) => {
+        const hours = Math.floor(milliseconds / (1000 * 60 * 60));
+        const minutes = Math.floor((milliseconds % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((milliseconds % (1000 * 60)) / 1000);
+        
+        if (hours > 0) {
+          return `${hours}h ${minutes}m`;
+        } else if (minutes > 0) {
+          return `${minutes}m ${seconds}s`;
+        } else {
+          return `${seconds}s`;
+        }
+      };
+
+      toast({
+        title: "Out of Credits",
+        description: `You've used all 50 free searches. Come back in ${formatTime(timeUntilReset)} for more credits.`,
+        variant: "destructive",
+      });
+      return;
+    }
+
     // Create new session if none exists
     if (!currentSessionId) {
       createNewSession();
@@ -154,6 +186,9 @@ const ChatSection = () => {
     addMessage(userMessage);
     setInputValue("");
     setIsLoading(true);
+
+    // Use a credit
+    await useCredit();
 
     try {
       const response = await fetch(
@@ -176,7 +211,21 @@ const ChatSection = () => {
       );
 
       if (!response.ok) {
-        throw new Error('Failed to get AI response');
+        const errorData = await response.json();
+        console.error('API Error:', errorData);
+        
+        if (errorData.error?.code === 429) {
+          // Update credits to 0 when API quota is exceeded
+          const { useCredits } = await import('@/contexts/CreditContext');
+          // This will be handled by the credit context
+          throw new Error('API quota exceeded. Please check your Google AI Studio billing or try again later.');
+        } else if (errorData.error?.code === 400) {
+          throw new Error('Invalid API key. Please check your Google AI Studio API key.');
+        } else if (errorData.error?.code === 403) {
+          throw new Error('API access denied. Please check your API key permissions.');
+        } else {
+          throw new Error(`API Error: ${errorData.error?.message || 'Failed to get AI response'}`);
+        }
       }
 
       const data = await response.json();
@@ -192,11 +241,25 @@ const ChatSection = () => {
       addMessage(aiMessage);
     } catch (error) {
       console.error('Error:', error);
+      
+      // Show specific error message
+      const errorMessage = error instanceof Error ? error.message : "Failed to get AI response";
+      
       toast({
-        title: "Error",
-        description: "Failed to get AI response. Please check your API key and try again.",
+        title: "API Error",
+        description: errorMessage,
         variant: "destructive",
       });
+
+      // Add a fallback response when API fails
+      const fallbackMessage = {
+        id: (Date.now() + 1).toString(),
+        text: `I apologize, but I'm currently unable to process your request due to API limitations. ${errorMessage.includes('quota') ? 'Please try again later or check your API key.' : 'Please check your API key and try again.'}`,
+        isUser: false,
+        timestamp: new Date(),
+      };
+
+      addMessage(fallbackMessage);
     } finally {
       setIsLoading(false);
     }
@@ -278,7 +341,7 @@ const ChatSection = () => {
       {/* Mobile Sidebar Overlay */}
       {showSidebar && (
         <div className="md:hidden fixed inset-0 z-50 bg-black/50" onClick={() => setShowSidebar(false)}>
-          <div className="fixed left-0 top-0 h-full w-72 sm:w-80 bg-background border-r border-border" onClick={(e) => e.stopPropagation()}>
+          <div className="fixed left-0 top-0 h-full w-80 bg-background border-r border-border" onClick={(e) => e.stopPropagation()}>
             <ChatHistorySidebar />
           </div>
         </div>
@@ -288,25 +351,37 @@ const ChatSection = () => {
       <div className="flex-1 flex flex-col min-w-0">
         {/* Chat Header */}
         <div className="border-b border-border p-2 sm:p-3 flex items-center justify-between bg-background flex-shrink-0">
-          <div className="flex items-center gap-1 sm:gap-2 min-w-0 flex-1">
+          <div className="flex items-center gap-2 min-w-0 flex-1">
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setShowSidebar(!showSidebar)}
-              className="h-7 w-7 p-0 md:hidden flex-shrink-0"
+              className="h-8 w-8 p-0 md:hidden flex-shrink-0"
             >
-              {showSidebar ? <X className="w-3.5 h-3.5" /> : <Menu className="w-3.5 h-3.5" />}
+              {showSidebar ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
             </Button>
             
-            <div className="flex items-center gap-1 sm:gap-2 min-w-0 flex-1">
-              <div className="w-6 h-6 sm:w-7 sm:h-7 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
-                <MessageCircle className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-primary-foreground" />
+            <div className="flex items-center gap-2 min-w-0 flex-1">
+              <div className="w-7 h-7 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
+                <MessageCircle className="w-4 h-4 text-primary-foreground" />
               </div>
-              <h3 className="text-sm sm:text-base font-semibold truncate">Ask Chinu(AI)</h3>
+              <h3 className="text-base font-semibold truncate">Ask Chinu(AI)</h3>
             </div>
           </div>
           
-          <div className="flex items-center gap-1 sm:gap-1.5 flex-shrink-0">
+          <div className="flex items-center gap-1 flex-shrink-0">
+            {/* Mobile Search - Always visible but compact */}
+            <div className="sm:hidden">
+              <MessageSearch 
+                messages={messages} 
+                onMessageSelect={(messageId) => {
+                  const element = document.getElementById(`message-${messageId}`);
+                  element?.scrollIntoView({ behavior: 'smooth' });
+                }}
+              />
+            </div>
+            
+            {/* Desktop Search */}
             <div className="hidden sm:block">
               <MessageSearch 
                 messages={messages} 
@@ -316,37 +391,56 @@ const ChatSection = () => {
                 }}
               />
             </div>
-            <div className="hidden md:block">
+            
+            {/* Credit Display - Always visible */}
+            <div className="hidden sm:block">
               <CreditDisplay />
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowAdvancedPanel(!showAdvancedPanel)}
-              className="h-7 w-7 p-0"
-              title="Advanced Features"
-            >
-              <Settings className="w-3.5 h-3.5" />
-            </Button>
-            <ThemeToggle />
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowApiKeyInput(!showApiKeyInput)}
-              className="h-7 w-7 p-0"
-              title="API Settings"
-            >
-              <Key className="w-3.5 h-3.5" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={clearChat}
-              className="h-7 w-7 p-0"
-              title="Clear Chat"
-            >
-              <Trash2 className="w-3.5 h-3.5" />
-            </Button>
+            
+            {/* Mobile Menu Button - Dropdown for mobile */}
+            <div className="sm:hidden">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowAdvancedPanel(!showAdvancedPanel)}
+                className="h-8 w-8 p-0"
+                title="Menu"
+              >
+                <Settings className="w-4 h-4" />
+              </Button>
+            </div>
+            
+            {/* Desktop buttons */}
+            <div className="hidden sm:flex items-center gap-1">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowAdvancedPanel(!showAdvancedPanel)}
+                className="h-7 w-7 p-0"
+                title="Advanced Features"
+              >
+                <Settings className="w-3.5 h-3.5" />
+              </Button>
+              <ThemeToggle />
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowApiKeyInput(!showApiKeyInput)}
+                className="h-7 w-7 p-0"
+                title="API Settings"
+              >
+                <Key className="w-3.5 h-3.5" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={clearChat}
+                className="h-7 w-7 p-0"
+                title="Clear Chat"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </Button>
+            </div>
           </div>
         </div>
 
@@ -415,6 +509,63 @@ const ChatSection = () => {
               <div ref={messagesEndRef} />
             </div>
 
+            {/* Input Area - Fixed at bottom */}
+            <div className="flex-shrink-0 p-3 border-t border-border bg-background">
+              <div className="max-w-4xl mx-auto">
+                <div className="flex gap-2 items-end">
+                  <div className="flex-1 relative">
+                    <Input
+                      ref={inputRef}
+                      value={inputValue}
+                      onChange={(e) => setInputValue(e.target.value)}
+                      onKeyPress={handleKeyPress}
+                      placeholder="Message Ask Chinu(AI)..."
+                      className="w-full rounded-2xl border-2 focus:border-primary pr-12 py-3 text-base resize-none"
+                      disabled={isLoading}
+                      style={{ fontSize: '16px' }} // Prevent zoom on iOS
+                    />
+                    <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center gap-1">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={isLoading}
+                        className="h-6 w-6 p-0 text-muted-foreground hover:text-foreground"
+                        title="Upload file or image"
+                      >
+                        <Paperclip className="w-4 h-4" />
+                      </Button>
+                      <VoiceInput onTranscript={handleVoiceTranscript} disabled={isLoading} />
+                    </div>
+                  </div>
+                  <Button
+                    onClick={() => sendMessage()}
+                    disabled={isLoading || !inputValue.trim()}
+                    size="sm"
+                    className="rounded-full w-10 h-10 p-0 bg-primary hover:bg-primary/90 flex-shrink-0"
+                  >
+                    <Send className="w-4 h-4" />
+                  </Button>
+                </div>
+                <div className="flex items-center justify-between mt-2">
+                  <div className="text-xs text-muted-foreground hidden sm:block">
+                    Ask Chinu(AI) can make mistakes. Consider checking important information.
+                  </div>
+                  <div className="sm:hidden">
+                    <CreditDisplay />
+                  </div>
+                </div>
+              </div>
+              
+              {/* Hidden file input */}
+              <input
+                ref={fileInputRef}
+                type="file"
+                onChange={handleFileUpload}
+                className="hidden"
+                accept=".txt,.md,.json,.png,.jpg,.jpeg,.gif,.webp,.pdf,.doc,.docx"
+              />
+            </div>
 
           </div>
 
@@ -423,7 +574,10 @@ const ChatSection = () => {
             <div className="w-full sm:w-80 border-l border-border bg-background overflow-y-auto">
               <div className="p-3 sm:p-4">
                 <div className="flex items-center justify-between mb-3 sm:mb-4">
-                  <h3 className="text-base sm:text-lg font-semibold">Advanced Features</h3>
+                  <h3 className="text-base sm:text-lg font-semibold">
+                    <span className="sm:hidden">Menu</span>
+                    <span className="hidden sm:inline">Advanced Features</span>
+                  </h3>
                   <Button
                     variant="ghost"
                     size="sm"
@@ -435,6 +589,46 @@ const ChatSection = () => {
                 </div>
 
                 <div className="space-y-4 sm:space-y-6">
+                  {/* Mobile-specific controls */}
+                  <div className="sm:hidden space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">Credits</span>
+                      <CreditDisplay />
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">Theme</span>
+                      <ThemeToggle />
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">API Key</span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setShowApiKeyInput(!showApiKeyInput)}
+                        className="h-8 px-3"
+                      >
+                        <Key className="w-4 h-4 mr-2" />
+                        Settings
+                      </Button>
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">Clear Chat</span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={clearChat}
+                        className="h-8 px-3 text-red-600 hover:text-red-700"
+                      >
+                        <Trash2 className="w-4 h-4 mr-2" />
+                        Clear
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* File Upload */}
                   <div>
                     <h4 className="text-xs sm:text-sm font-medium mb-2">File Upload</h4>
                     <FileUpload onFileProcessed={(file, content) => {

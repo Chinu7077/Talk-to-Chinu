@@ -53,12 +53,12 @@ const MessageSearch = ({ messages, onMessageSelect }: MessageSearchProps) => {
   return (
     <div className="relative">
       <div className="flex items-center gap-2">
-        <Search className="w-4 h-4 text-muted-foreground" />
+        <Search className="w-4 h-4 text-muted-foreground flex-shrink-0" />
         <Input
           placeholder="Search messages..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="flex-1"
+          className="flex-1 min-w-0 text-sm"
           autoFocus
         />
         <Button
@@ -68,7 +68,7 @@ const MessageSearch = ({ messages, onMessageSelect }: MessageSearchProps) => {
             setIsOpen(false);
             setSearchQuery('');
           }}
-          className="h-8 w-8 p-0"
+          className="h-8 w-8 p-0 flex-shrink-0"
         >
           <X className="w-4 h-4" />
         </Button>
@@ -98,7 +98,7 @@ const MessageSearch = ({ messages, onMessageSelect }: MessageSearchProps) => {
                   <div className="text-xs text-muted-foreground mb-1">
                     {message.isUser ? 'You' : 'AI'} • {message.timestamp.toLocaleString()}
                   </div>
-                  <div className="text-sm">
+                  <div className="text-sm line-clamp-2">
                     {highlightText(message.text, searchQuery)}
                   </div>
                 </div>
